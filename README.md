@@ -1,120 +1,137 @@
-# DM4ML Assignment 2: Movie Recommendation Pipeline
+# DM4ML Assignment 2
 
-This project implements the data pipeline through model evaluation for the
-MovieLens 100K ratings dataset. It uses simple Python modules and local CSV,
-pickle, and SQLite-backed MLflow storage. Workflow orchestration is intentionally
-out of scope.
+**End-to-End Data Management Pipeline for a Movie Recommendation System**  
+**Roll Number:** 2025AG05482
 
-## Setup
+## 1. About the project
 
-Use **64-bit Python 3.11** for both macOS Apple Silicon development and a future
-Airflow Linux/ARM64 container. It is supported by Airflow, MLflow, pandas,
-NumPy, and the published ARM64 `scikit-surprise` wheel.
+For this assignment, I built a data pipeline for a movie recommendation system using the MovieLens 100K dataset. It downloads the data, checks its quality, prepares it, creates features, trains two models and compares their results.
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-```
+I used **Docker** to run **Apache Airflow** on my MacBook M4. Airflow runs the seven tasks in order. I used **MLflow** to keep track of model runs and results.
 
-`scikit-surprise==1.1.5` is pinned because it provides CPython 3.11 wheels for
-macOS ARM64 and Linux ARM64 and supports the NumPy 2 line. If pip cannot use a
-wheel for a different platform or Python version, it may need to build the
-extension from source; install a C/C++ compiler and Python development headers
-in that environment. Airflow 3.4.0's Python 3.11 constraints currently specify
-NumPy 2.4.6 and pandas 3.1.0, which fit the project requirement ranges.
-`cffi==2.1.1`, a transitive dependency selected by those constraints, has no
-matching CPython 3.11 ARM64 wheel in the checked package index; its source
-distribution is available. If pip must build it, provide a C compiler and
-libffi development headers. Airflow is intentionally **not** included in
-`requirements.txt`.
+## 2. Tools used and how they work together
 
-## Run the complete pipeline
+- **Python, pandas and NumPy:** Data processing and preparation.
+- **Surprise SVD:** Personalized recommendation model.
+- **Docker Desktop:** Runs the Airflow services in containers.
+- **Apache Airflow 3.1.5:** Runs the seven pipeline tasks.
+- **MLflow:** Stores model parameters, metrics and run details.
+- **GitHub:** Stores the project code and setup files.
 
-Run from any terminal directory:
+**Overall flow:** MovieLens 100K data → Python pipeline (7 stages) → model results and reports. Docker runs Airflow, Airflow controls the task order, and MLflow tracks the model runs.
 
-```bash
-python /path/to/Assignment\ 2/main.py
-```
+## 3. Dataset
 
-By default, the project root is resolved from `main.py`, not the current
-working directory. To use another output directory, pass `--project-dir
-/path/to/project-data`. The pipeline downloads MovieLens 100K if
-`data/raw/ml-100k.zip` is not present, then executes ingestion, validation,
-preparation, transformation, feature creation, training, and evaluation.
+Dataset: MovieLens 100K  
+Source: https://grouplens.org/datasets/movielens/100k/
 
-## Notebook
+- **943 users**
+- **1,682 movies**
+- **100,000 ratings**
 
-Open `DM4ML_Assignment_2.ipynb` and use **Restart Kernel → Run All** to inspect
-actual stage reports and result tables. The notebook finds the project through
-its working directory or Python path. If it is not discoverable, set the
-`DM4ML_PROJECT_ROOT` environment variable to the project directory before
-starting the notebook kernel. The notebook reuses saved data and models where
-available.
+The ingestion step creates `data/raw/users.csv`, `data/raw/movies.csv` and `data/raw/ratings.csv`.
 
-## Project outputs
+## 4. Pipeline steps
 
-- `data/raw/`: original MovieLens archive and ingested tables.
-- `data/errors/invalid_records.csv`: rows rejected by validation, with issue
-  labels.
-- `data/processed/`: cleaned entities, chronological 80/20 ratings split,
-  user activity, movie popularity, interaction matrix, and stage reports.
-- `data/features/`: user, movie, and interaction feature tables and catalog.
-- `models/`: serialized popularity baseline and Surprise SVD model.
-- `reports/`: ingestion, validation, preparation, training, and evaluation
-  reports plus the model comparison table.
-- `mlruns/`: local SQLite MLflow tracking database and model artifacts.
+1. **Ingestion:** Downloads and loads the MovieLens data.
+2. **Validation:** Checks missing required values, duplicates, data types, rating range, timestamps and user/movie references.
+3. **Preparation:** Cleans the data and creates training and test files.
+4. **Transformation:** Creates user activity, movie popularity and other useful tables.
+5. **Feature engineering:** Creates user, movie and interaction features.
+6. **Model training:** Trains the Popularity and SVD models.
+7. **Model evaluation:** Compares both models using ranking and rating metrics.
 
-MLflow uses `mlruns/mlflow.db` under the project root by default. To use a
-separate database or a tracking server (for example, in a container), set
-`MLFLOW_TRACKING_URI` before running the pipeline. A new SQLite database is
-created at the configured location when it does not exist; existing tracking
-databases are left intact. For a container, point the URI at a writable
-persistent volume, for example:
+Airflow runs these tasks one after another.
 
-```bash
-export MLFLOW_TRACKING_URI='sqlite:////path/to/persistent/mlruns/mlflow.db'
-```
+## 5. Docker and Airflow setup (Mac M4)
 
-The tracking URI is not written to reports; local SQLite database references
-are recorded relative to the project root when possible.
+I used Docker because installing Airflow directly on my Mac M4 was giving compatibility issues.
 
-The chronological split sorts interactions by Unix timestamp, assigning the
-earliest 80% to training and latest 20% to test. Derived interaction
-statistics, features, and model fitting use training data only. Evaluation
-uses users with at least one held-out rating of 4 or 5. Precision@10 divides
-hits by 10; Recall@10 and NDCG@10 use held-out relevant items. Coverage is the
-fraction of the movie catalog recommended, and diversity is mean pairwise
-genre Jaccard distance. RMSE and MAE are calculated for each model on every
-held-out explicit rating.
+1. Install **Docker Desktop for Mac (Apple Silicon)**: https://docs.docker.com/desktop/setup/install/mac-install/
+2. Open Docker Desktop and wait for it to start.
+3. I referred to the official Airflow Docker instructions: https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html
+4. Open the project folder and go to `airflow-setup/`.
+5. The following setup files are included in that folder:
+   - `docker-compose.yaml` – Sets up the Airflow services.
+   - `Dockerfile` – Builds the Airflow image with the needed packages.
+   - `requirements-project.txt` – Lists extra Python packages used by the project.
+   - `dags/recommendation_pipeline.py` – Defines the Airflow pipeline.
+6. Created a .env file inside the airflow-setup folder and added AIRFLOW_UID=50000 for the Airflow Docker setup.
+7. Open Terminal in the `airflow-setup/` folder and run:
 
-## Dependency and future Docker notes
+   ```bash
+   docker compose up --build -d
+   ```
 
-The pipeline imports pandas, NumPy, Surprise, and MLflow; it does not import
-scikit-learn, so scikit-learn is not a direct project requirement. For a future
-container, use the official multi-platform Airflow image on Linux/ARM64, such
-as a versioned `apache/airflow:<airflow-version>-python3.11` image. Install
-Airflow using its matching official constraints file for the exact Airflow and
-Python versions, then add project dependencies without overriding those
-constraints. Keep Airflow dependencies separate from this project's
-`requirements.txt`. No Airflow or Docker image has been installed or tested as
-part of this project.
+8. Open `http://localhost:8080` in a browser and sign in using the Airflow login configured for the local setup.
+9. Find the DAG named `dm4ml_recommendation_pipeline`, trigger it and check the Graph View.
 
-Compatibility references:
+**Result:** All seven tasks completed successfully in my run.
 
-- [Airflow supported versions and constraints](https://airflow.apache.org/docs/apache-airflow/stable/installation/index.html)
-- [Official Airflow Docker image platforms](https://airflow.apache.org/docs/docker-stack/index.html)
-- [scikit-surprise releases and platform wheels](https://pypi.org/project/scikit-surprise/)
-- [NumPy 2.3 Python support](https://numpy.org/doc/2.3/release/2.3.0-notes.html)
-- [pandas releases and Python support](https://pypi.org/project/pandas/)
-- [MLflow installation](https://mlflow.org/docs/latest/ml/getting-started/installing-mlflow/)
+> **Note:** The exact `.env` values and any first-time initialization depend on the Docker Compose configuration. Check `airflow-setup/docker-compose.yaml` before running on a new machine.
 
-## Module entry points
+## 6. Running the Python pipeline
 
-- `src.ingestion.movielens.ingest_movielens(raw_dir, report_dir)`
-- `src.validation.validate_data(raw_dir, report_dir, errors_dir)`
-- `src.preparation.prepare_data(raw_dir, processed_dir, test_fraction=0.2)`
-- `src.transformation.transform_data(processed_dir)`
-- `src.features.build_features(processed_dir, features_dir)`
-- `src.training.train_models(processed_dir, models_dir, reports_dir, tracking_dir)`
-- `src.evaluation.evaluate_models(processed_dir, models_dir, reports_dir, tracking_dir, k=10)`
+The main entry file is `main.py`. The Python code for each stage is kept in `src/`. Project dependencies are listed in `requirements.txt`.
+
+Airflow runs the same project stages through `airflow-setup/dags/recommendation_pipeline.py`.
+
+## 7. Validation and preparation results
+
+The six main validation checks passed. There were some warnings for optional movie information, including missing release dates and IMDb URLs. The validation results are saved in `reports/validation_report.json`.
+
+I split the ratings in time order:
+
+- **Training ratings:** 79,999
+- **Test ratings:** 20,001
+
+The feature details are saved in `data/features/feature_catalog.csv`, and the feature report is in `data/features/feature_report.json`.
+
+## 8. Models and results
+
+I trained two models:
+
+- **Popularity model:** Recommends movies based on their popularity. This is the baseline.
+- **SVD model:** Uses past ratings to learn user preferences and make personalized predictions.
+
+The results from `reports/evaluation_comparison.csv` are:
+
+| Metric | Popularity | SVD |
+|---|---:|---:|
+| Precision@10 | 0.2293 | 0.1679 |
+| Recall@10 | 0.0847 | 0.0576 |
+| NDCG@10 | 0.2537 | 0.1606 |
+| Coverage | 0.0458 | 0.0737 |
+| Diversity | 0.8534 | 0.8563 |
+| RMSE | 1.0367 | 1.0287 |
+| MAE | 0.8314 | 0.8194 |
+
+The Popularity model performed better on Precision@10, Recall@10 and NDCG@10. SVD had better Coverage and Diversity, and lower RMSE and MAE.
+
+## 9. MLflow tracking
+
+I used MLflow to record model parameters, evaluation metrics and model runs. The experiment is named `DM4ML-MovieLens100K`.
+
+MLflow uses a local tracking database in this project. To view the runs, start MLflow with the same tracking database used during training. The database is a local file and is not included in the GitHub repository.
+
+## 10. Main project files
+
+| File or folder | Purpose |
+|---|---|
+| `main.py` | Main Python pipeline |
+| `src/` | Code for each pipeline stage |
+| `requirements.txt` | Python packages |
+| `airflow-setup/docker-compose.yaml` | Docker and Airflow services |
+| `airflow-setup/Dockerfile` | Custom Airflow image |
+| `airflow-setup/requirements-project.txt` | Extra dependencies for Airflow |
+| `airflow-setup/dags/recommendation_pipeline.py` | Airflow DAG |
+| `reports/` | Validation, ingestion and evaluation reports |
+| `data/features/feature_catalog.csv` | Feature names and descriptions |
+
+The downloaded data, trained model files, MLflow database and runtime logs are generated locally and are not uploaded to GitHub.
+
+## 11. Final result
+
+I was able to run the full pipeline in Airflow using Docker. All seven tasks completed successfully. Both models were trained and evaluated, and I compared their results using MLflow and the saved reports.
+
+The assignment report contains more details and screenshots of the Airflow run and MLflow results.
