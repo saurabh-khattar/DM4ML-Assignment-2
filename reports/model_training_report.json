@@ -1,0 +1,33 @@
+{
+  "stage": "model_training",
+  "status": "success",
+  "trained_at_utc": "2026-11-11T16:30:24.550497+00:00",
+  "training_records": 79999,
+  "experiment_name": "DM4ML-MovieLens100K",
+  "tracking_database": "mlruns/airflow_mlflow.db",
+  "tracking_uri_source": "MLFLOW_TRACKING_URI",
+  "models": [
+    {
+      "model": "popularity",
+      "run_id": "9005ba760c0544cc834d3557fe6ba71a",
+      "artifact": "models/popularity_model.pkl",
+      "parameters": {
+        "algorithm": "rating-count ranking",
+        "train_records": 79999
+      }
+    },
+    {
+      "model": "svd",
+      "run_id": "5257a62860db4b509ba2c44798033b6b",
+      "artifact": "models/svd_model.pkl",
+      "parameters": {
+        "algorithm": "Surprise SVD",
+        "train_records": 79999,
+        "n_factors": 50,
+        "n_epochs": 20,
+        "random_state": 42,
+        "verbose": false
+      }
+    }
+  ]
+}

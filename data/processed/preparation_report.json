@@ -1,0 +1,59 @@
+{
+  "stage": "data_preparation",
+  "status": "success",
+  "prepared_at_utc": "2026-11-11T16:30:19.342446+00:00",
+  "original_record_counts": {
+    "users": 943,
+    "movies": 1682,
+    "ratings": 100000
+  },
+  "clean_record_counts": {
+    "users": 943,
+    "movies": 1682,
+    "ratings": 100000
+  },
+  "removed_record_counts": {
+    "users": 0,
+    "movies": 0,
+    "ratings": 0
+  },
+  "rejected_validation_record_counts": {
+    "users": 0,
+    "movies": 0,
+    "ratings": 0
+  },
+  "filled_missing_values": {
+    "users.gender": 0,
+    "users.occupation": 0,
+    "users.zip_code": 0,
+    "users.age": 0,
+    "movies.title": 0,
+    "movies.release_date": 1,
+    "movies.imdb_url": 3
+  },
+  "dropped_all_missing_movie_columns": [
+    "video_release_date"
+  ],
+  "split": {
+    "method": "chronological; all interactions with the cutoff timestamp remain together",
+    "requested_test_fraction": 0.2,
+    "target_train_records": 80000,
+    "train_records": 79999,
+    "test_records": 20001,
+    "train_fraction": 0.79999,
+    "test_fraction": 0.20001,
+    "train_max_timestamp": 889237247,
+    "test_min_timestamp": 889237269,
+    "cutoff_timestamp": 889237269,
+    "cutoff_group_assignment": "test",
+    "cutoff_timestamp_in_train": false,
+    "cutoff_timestamp_in_test": true
+  },
+  "outputs": [
+    "data/processed/users_clean.csv",
+    "data/processed/movies_clean.csv",
+    "data/processed/ratings_clean.csv",
+    "data/processed/ratings_train.csv",
+    "data/processed/ratings_test.csv"
+  ]
+}

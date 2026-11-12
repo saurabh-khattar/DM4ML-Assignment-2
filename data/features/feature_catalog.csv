@@ -1,0 +1,8 @@
+feature_name,definition,data_type,source,entity
+user_average_rating,Mean explicit training rating; global training mean fallback for users without ratings,float,ratings_train.csv,user
+user_activity_count,Number of training ratings recorded for the user,integer,ratings_train.csv,user
+preferred_genre,Most frequent genre among the user's training ratings of 4 or 5,string,ratings_train.csv + movies_clean.csv,user
+days_since_last_interaction,Days between the user's last training rating and latest training timestamp; -1 for no training interaction,float,ratings_train.csv,user
+movie_popularity,Number of training ratings for the movie,integer,ratings_train.csv,movie
+movie_average_rating,Mean explicit training rating; global training mean fallback for movies without ratings,float,ratings_train.csv,movie
+days_since_previous_interaction,Elapsed days since the user's previous training interaction; first interaction is blank,float,ratings_train.csv,interaction

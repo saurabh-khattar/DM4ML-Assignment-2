@@ -1,0 +1,27 @@
+{
+  "stage": "feature_management",
+  "status": "success",
+  "created_at_utc": "2026-11-11T16:30:21.671602+00:00",
+  "source": "training split only (test data excluded)",
+  "outputs": {
+    "user_features": "data/features/user_features.csv",
+    "movie_features": "data/features/movie_features.csv",
+    "interaction_features": "data/features/interaction_features.csv",
+    "feature_catalog": "data/features/feature_catalog.csv"
+  },
+  "shapes": {
+    "user_features": [
+      943,
+      10
+    ],
+    "movie_features": [
+      1682,
+      25
+    ],
+    "interaction_features": [
+      79999,
+      5
+    ]
+  },
+  "feature_count": 7
+}

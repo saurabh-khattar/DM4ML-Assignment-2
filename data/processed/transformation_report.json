@@ -1,0 +1,26 @@
+{
+  "stage": "data_transformation",
+  "status": "success",
+  "transformed_at_utc": "2026-11-11T16:30:20.654686+00:00",
+  "source": "ratings_train.csv only (test data excluded)",
+  "outputs": {
+    "user_activity": "data/processed/user_activity.csv",
+    "movie_popularity": "data/processed/movie_popularity.csv",
+    "interaction_matrix": "data/processed/interaction_matrix.csv"
+  },
+  "shapes": {
+    "user_activity": [
+      751,
+      4
+    ],
+    "movie_popularity": [
+      1682,
+      4
+    ],
+    "interaction_matrix": [
+      943,
+      1682
+    ]
+  },
+  "interaction_matrix_missing_value_encoding": "0 means no training interaction"
+}

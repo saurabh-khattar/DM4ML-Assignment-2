@@ -1,0 +1,18 @@
+{
+  "stage": "data_ingestion",
+  "source": "https://files.grouplens.org/datasets/movielens/ml-100k.zip",
+  "started_at_utc": "2026-11-11T16:30:17.028056+00:00",
+  "status": "success",
+  "archive": "data/raw/ml-100k.zip",
+  "record_counts": {
+    "users": 943,
+    "movies": 1682,
+    "ratings": 100000
+  },
+  "outputs": {
+    "users": "data/raw/users.csv",
+    "movies": "data/raw/movies.csv",
+    "ratings": "data/raw/ratings.csv"
+  },
+  "finished_at_utc": "2026-11-11T16:30:17.175281+00:00"
+}

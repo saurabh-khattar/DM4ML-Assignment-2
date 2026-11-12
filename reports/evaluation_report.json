@@ -1,0 +1,38 @@
+{
+  "stage": "model_evaluation",
+  "status": "success",
+  "evaluated_at_utc": "2026-11-11T16:30:27.252958+00:00",
+  "k": 10,
+  "relevant_rating_threshold": 4,
+  "evaluation_user_count": 290,
+  "evaluation_user_rule": "users with at least one held-out rating >= 4",
+  "candidate_rule": "all catalog movies not rated by the user in training data",
+  "coverage_denominator": 1682,
+  "diversity_definition": "mean pairwise genre Jaccard distance within recommended lists",
+  "rating_metrics_rule": "RMSE/MAE over every held-out explicit rating; popularity predicts training movie mean or global mean",
+  "metrics": {
+    "popularity": {
+      "precision_at_10": 0.2293103448275862,
+      "recall_at_10": 0.0847148395297878,
+      "ndcg_at_10": 0.25370018870012506,
+      "coverage": 0.045778834720570746,
+      "diversity": 0.853398376208721,
+      "rmse": 1.036709058678756,
+      "mae": 0.8314234077677363
+    },
+    "svd": {
+      "precision_at_10": 0.16793103448275862,
+      "recall_at_10": 0.05757980718381381,
+      "ndcg_at_10": 0.16055659532867553,
+      "coverage": 0.07372175980975029,
+      "diversity": 0.8563326035395001,
+      "rmse": 1.0287435355486085,
+      "mae": 0.8194447362124199
+    }
+  },
+  "comparison_path": "reports/evaluation_comparison.csv",
+  "mlflow_run_ids": {
+    "popularity": "9005ba760c0544cc834d3557fe6ba71a",
+    "svd": "5257a62860db4b509ba2c44798033b6b"
+  }
+}

@@ -1,0 +1,63 @@
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+__MACOSX/
+
+.env
+.env.*
+!.env.example
+
+.ipynb_checkpoints/
+*.log
+*.tmp
+*.temp
+*.part
+*.bak
+*~
+*.swp
+
+mlruns/
+
+# Airflow local configuration and runtime files
+
+airflow-setup/config/
+
+airflow-setup/logs/
+
+airflow-setup/Dockerfile.backup
+
+# MLflow local artifacts
+
+mlartifacts/
+
+mlflow.db
+
+# Trained models
+
+models/*.pkl
+
+models/*.joblib
+
+# Original and generated datasets
+
+data/raw/*.zip
+
+data/raw/*.csv
+
+data/processed/*.csv
+
+data/features/*.csv
+
+data/errors/*.csv
+
+# Keep the feature catalog as assignment evidence
+
+!data/features/feature_catalog.csv
+
+# Keep small reports and metadata files
+
+!data/processed/*.json
+
+!data/features/*.json

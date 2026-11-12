@@ -1,0 +1,4 @@
+numpy>=1.26,<3
+pandas>=2.2,<4
+scikit-surprise==1.1.5
+mlflow>=3.0,<4
