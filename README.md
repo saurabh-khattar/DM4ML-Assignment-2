@@ -56,25 +56,33 @@ I used Docker because installing Airflow directly on my Mac M4 was giving compat
    - `Dockerfile` – Builds the Airflow image with the needed packages.
    - `requirements-project.txt` – Lists extra Python packages used by the project.
    - `dags/recommendation_pipeline.py` – Defines the Airflow pipeline.
-6. Created a .env file inside the airflow-setup folder and added AIRFLOW_UID=50000 for the Airflow Docker setup.
+6. Create a local `.env` file inside `airflow-setup/` containing `AIRFLOW_UID=50000`. Do not commit this file.
 7. Open Terminal in the `airflow-setup/` folder and run:
 
    ```bash
    docker compose up --build -d
    ```
 
-8. Open `http://localhost:8080` in a browser and sign in using the Airflow login configured for the local setup.
+8. Open `http://localhost:8080` in a browser. The provided Compose file defaults to username `airflow` and password `airflow` for local development (unless overridden with `_AIRFLOW_WWW_USER_USERNAME` and `_AIRFLOW_WWW_USER_PASSWORD`). Change these defaults for any non-local deployment.
 9. Find the DAG named `dm4ml_recommendation_pipeline`, trigger it and check the Graph View.
 
 **Result:** All seven tasks completed successfully in my run.
 
-> **Note:** The exact `.env` values and any first-time initialization depend on the Docker Compose configuration. Check `airflow-setup/docker-compose.yaml` before running on a new machine.
+> **Note:** Docker Compose includes an `airflow-init` service for database initialization and creating the local admin account. If starting on another machine, check `airflow-setup/docker-compose.yaml`. The `.env` file and generated outputs are intentionally not committed.
 
 ## 6. Running the Python pipeline
 
 The main entry file is `main.py`. The Python code for each stage is kept in `src/`. Project dependencies are listed in `requirements.txt`.
 
-Airflow runs the same project stages through `airflow-setup/dags/recommendation_pipeline.py`.
+From the **project root**, in a compatible Python environment, run:
+
+```bash
+python -m pip install -r requirements.txt
+python main.py
+```
+
+This executes ingestion through evaluation and creates the data, reports, models, and local MLflow tracking files. The first run may download the MovieLens 100K dataset, so internet access may be needed. Airflow runs the same project stages through `airflow-setup/dags/recommendation_pipeline.py`.
+
 
 ## 7. Validation and preparation results
 
@@ -112,7 +120,15 @@ The Popularity model performed better on Precision@10, Recall@10 and NDCG@10. SV
 
 I used MLflow to record model parameters, evaluation metrics and model runs. The experiment is named `DM4ML-MovieLens100K`.
 
-MLflow uses a local tracking database in this project. To view the runs, start MLflow with the same tracking database used during training. The database is a local file and is not included in the GitHub repository.
+The **Airflow Docker run** uses the SQLite tracking database `mlruns/airflow_mlflow.db`. After running the DAG, from the **project root**, start the MLflow UI with:
+
+```bash
+mlflow ui --backend-store-uri sqlite:///mlruns/airflow_mlflow.db --port 5000
+```
+
+Open `http://localhost:5000` to inspect experiments and runs. This command requires MLflow installed in your local Python environment (`python -m pip install -r requirements.txt`).
+
+**Note:** Running `python main.py` outside Airflow may use a different local MLflow tracking location; the command above specifically opens the database used by the Dockerized Airflow pipeline. MLflow databases and generated artifacts are local files, not included in GitHub. A fresh clone will need to run the pipeline to generate its own runs.
 
 ## 10. Main project files
 
@@ -130,7 +146,11 @@ MLflow uses a local tracking database in this project. To view the runs, start M
 
 The downloaded data, trained model files, MLflow database and runtime logs are generated locally and are not uploaded to GitHub.
 
-## 11. Final result
+## 11. Reproducing and checking the results
+
+After running the pipeline, check `reports/ingestion_report.json`, `reports/validation_report.json`, `reports/model_training_report.json`, and `reports/evaluation_comparison.csv`. The feature definitions are in `data/features/feature_catalog.csv`. For the Airflow run, check that all seven tasks are successful in Graph View. The report screenshots document the execution performed for this assignment; newly generated results may differ if dependencies or settings change.
+
+## 12. Final result
 
 I was able to run the full pipeline in Airflow using Docker. All seven tasks completed successfully. Both models were trained and evaluated, and I compared their results using MLflow and the saved reports.
 
