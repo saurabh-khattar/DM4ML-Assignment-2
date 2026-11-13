@@ -9,6 +9,26 @@ For this assignment, I built a data pipeline for a movie recommendation system u
 
 I used **Docker** to run **Apache Airflow** on my MacBook M4. Airflow runs the seven tasks in order. I used **MLflow** to keep track of model runs and results.
 
+## Pipeline Architecture and Execution Evidence
+
+### Architecture Diagram
+
+The following diagram illustrates the end-to-end MovieLens 100K recommendation pipeline, including its seven processing stages, Apache Airflow orchestration, Docker environment, and MLflow experiment tracking.
+
+![DM4ML Pipeline Architecture](docs/DM4ML_Pipeline_Architecture.png)
+
+### Successful Airflow Execution
+
+The Apache Airflow DAG `dm4ml_recommendation_pipeline` successfully executed all seven pipeline tasks.
+
+![Successful Airflow DAG Execution](docs/airflow_success.png)
+
+### MLflow Experiment Tracking
+
+MLflow was used to track the popularity baseline and Surprise SVD models, including their parameters, evaluation metrics, and artifacts.
+
+![MLflow Experiment Tracking](docs/mlflow_experiment.png)
+
 ## 2. Tools used and how they work together
 
 - **Python, pandas and NumPy:** Data processing and preparation.
@@ -83,12 +103,11 @@ python main.py
 
 This executes ingestion through evaluation and creates the data, reports, models, and local MLflow tracking files. The first run may download the MovieLens 100K dataset, so internet access may be needed. Airflow runs the same project stages through `airflow-setup/dags/recommendation_pipeline.py`.
 
-
 ## 7. Validation and preparation results
 
 The six main validation checks passed. There were some warnings for optional movie information, including missing release dates and IMDb URLs. The validation results are saved in `reports/validation_report.json`.
 
-I split the ratings in time order:
+I used a **chronological, timestamp-grouped train/test split** to keep earlier ratings in training and later ratings in testing. Ratings sharing the cutoff timestamp were kept together to avoid timestamp overlap.
 
 - **Training ratings:** 79,999
 - **Test ratings:** 20,001
@@ -114,7 +133,7 @@ The results from `reports/evaluation_comparison.csv` are:
 | RMSE | 1.0367 | 1.0287 |
 | MAE | 0.8314 | 0.8194 |
 
-The Popularity model performed better on Precision@10, Recall@10 and NDCG@10. SVD had better Coverage and Diversity, and lower RMSE and MAE.
+The Popularity model performed better on Precision@10, Recall@10 and NDCG@10. SVD had higher Coverage, slightly higher Diversity, and lower RMSE and MAE.
 
 ## 9. MLflow tracking
 
@@ -128,7 +147,7 @@ mlflow ui --backend-store-uri sqlite:///mlruns/airflow_mlflow.db --port 5000
 
 Open `http://localhost:5000` to inspect experiments and runs. This command requires MLflow installed in your local Python environment (`python -m pip install -r requirements.txt`).
 
-**Note:** Running `python main.py` outside Airflow may use a different local MLflow tracking location; the command above specifically opens the database used by the Dockerized Airflow pipeline. MLflow databases and generated artifacts are local files, not included in GitHub. A fresh clone will need to run the pipeline to generate its own runs.
+**Note:** Running `python main.py` outside Airflow uses `mlruns/mlflow.db` by default, unless `MLFLOW_TRACKING_URI` is set. The command above opens `mlruns/airflow_mlflow.db`, which is used by the Dockerized Airflow pipeline. MLflow databases and generated artifacts are local files, not included in GitHub. A fresh clone will need to run the pipeline to generate its own runs.
 
 ## 10. Main project files
 
@@ -143,12 +162,15 @@ Open `http://localhost:5000` to inspect experiments and runs. This command requi
 | `airflow-setup/dags/recommendation_pipeline.py` | Airflow DAG |
 | `reports/` | Validation, ingestion and evaluation reports |
 | `data/features/feature_catalog.csv` | Feature names and descriptions |
+| `docs/DM4ML_Pipeline_Architecture.png` | End-to-end pipeline architecture diagram |
+| `docs/airflow_success.png` | Screenshot of successful Airflow execution |
+| `docs/mlflow_experiment.png` | MLflow experiment tracking screenshot |
 
 The downloaded data, trained model files, MLflow database and runtime logs are generated locally and are not uploaded to GitHub.
 
 ## 11. Reproducing and checking the results
 
-After running the pipeline, check `reports/ingestion_report.json`, `reports/validation_report.json`, `reports/model_training_report.json`, and `reports/evaluation_comparison.csv`. The feature definitions are in `data/features/feature_catalog.csv`. For the Airflow run, check that all seven tasks are successful in Graph View. The report screenshots document the execution performed for this assignment; newly generated results may differ if dependencies or settings change.
+After running the pipeline, check `reports/ingestion_report.json`, `reports/validation_report.json`, `reports/model_training_report.json`, and `reports/evaluation_comparison.csv`. The feature definitions are in `data/features/feature_catalog.csv`. For the Airflow run, check that all seven tasks are successful in Graph View. The screenshots in `docs/` document the execution performed for this assignment; newly generated results may differ if dependencies or settings change.
 
 ## 12. Final result
 
